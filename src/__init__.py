@@ -28,4 +28,5 @@ watermarked_signal, _ = wavmark.encode_watermark(model, signal, payload, show_pr
 payload_decoded, _ = wavmark.decode_watermark(model, watermarked_signal, show_progress=True)
 BER = (payload != payload_decoded).mean() * 100
 
+print(payload)
 print("Decode BER:%.1f" % BER)
