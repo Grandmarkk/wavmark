@@ -3,7 +3,7 @@ import soundfile
 import torch
 import wavmark
 from wavmark.utils.emoji_converter import emoji_convert
-from wavmark.attacker.resampler import resample
+from wavmark.attacker.echo_adder import add_echo
 
 
 # 1.load model
@@ -28,7 +28,7 @@ watermarked_signal, _ = wavmark.encode_watermark(model, signal, payload, show_pr
 soundfile.write("output.wav", watermarked_signal, 16000)
 
 ## attack watermarked audio
-resample("output.wav", 14400)
+add_echo("output.wav")
 
 # 5.decode watermark
 watermarked_signal, sample_rate = soundfile.read("output.wav")
