@@ -2,7 +2,7 @@ import numpy as np
 import soundfile
 import torch
 import wavmark
-from wavmark.utils.emoji_converter import emoji_convert
+from wavmark.utils.emoji_converter import emoji_convert, binary_to_emoji
 from wavmark.attacker.echo_adder import add_echo
 
 
@@ -12,7 +12,7 @@ model = wavmark.load_model().to(device)
 
 # 2.create 16-bit payload
 binary_representation = emoji_convert("⭐")
-payload = random_binary_array = np.array([int(bit) for bit in binary_representation], dtype=np.int8)
+payload = np.array([int(bit) for bit in binary_representation], dtype=np.int8)
 print("Payload:", payload)
 
 # 3.read host audio
@@ -32,8 +32,9 @@ add_echo("output.wav")
 
 # 5.decode watermark
 watermarked_signal, sample_rate = soundfile.read("output.wav")
-payload_decoded, _ = wavmark.decode_watermark(model, watermarked_signal, show_progress=True)
+payload_decoded, info = wavmark.decode_watermark(model, watermarked_signal, show_progress=True)
 BER = (payload != payload_decoded).mean() * 100
 
 print(payload_decoded)
+print(binary_to_emoji(payload_decoded))
 print("Decode BER:%.1f" % BER)
