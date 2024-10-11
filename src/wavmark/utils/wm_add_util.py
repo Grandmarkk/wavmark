@@ -3,6 +3,8 @@ import numpy as np
 from ..utils import metric_util
 import tqdm
 import time
+import numpy as np
+import matplotlib.pyplot as plt
 
 # The pattern bits can be any random sequence.
 # But don't use all-zeros, all-ones, or any periodic sequence, which will seriously hurt decoding performance.
@@ -11,6 +13,51 @@ fix_pattern = [1, 1, 1, 1, 0, 0, 1, 0, 0, 1, 1, 1, 0, 1, 1, 0, 0, 1, 1, 0, 0, 0,
                1, 1, 0, 1, 0, 1, 0, 1, 1, 0, 1, 1, 0, 1, 0, 0, 0, 0, 1, 0, 0, 1,
                1, 1, 1, 0, 0, 1, 0, 1, 0, 1, 1, 0, 1, 0, 0, 1, 0, 1, 1, 1, 1, 0,
                0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 1, 0]
+
+
+def plot_audio_with_watermark(original_audio, watermarked_audio, watermark_bits, num_point):
+    # Sample rate
+    sample_rate = 16000  # 16 kHz
+
+    # Plot Original Audio Signal
+    plt.figure(figsize=(12, 10))
+
+    # Original Audio Plot
+    plt.subplot(2, 1, 1)
+    time_original = np.linspace(0, len(original_audio) / sample_rate, num=len(original_audio))
+    plt.plot(time_original, original_audio, label='Original Audio Signal', color='lightblue')
+
+    plt.title('Original Audio Signal')
+    plt.xlabel('Time (seconds)')
+    plt.ylabel('Amplitude')
+    plt.legend()
+    plt.grid()
+
+    # Watermark Bits Plot
+    plt.subplot(2, 1, 2)
+    time_watermark = np.linspace(0, len(watermark_bits) / sample_rate, num=len(watermark_bits))
+    plt.step(time_watermark, watermark_bits, label='Watermark Bits', color='purple', where='post')
+
+    plt.title('Watermark Bits')
+    plt.xlabel('Time (seconds)')
+    plt.ylabel('Watermark Value')
+    plt.yticks([0, 1], ['0', '1'])  # Only show 0 and 1
+    plt.grid()
+
+    plt.tight_layout()
+    plt.show()
+
+    # Plot Watermarked Audio Signal
+    plt.figure(figsize=(12, 6))
+    time_watermarked = np.linspace(0, len(watermarked_audio) / sample_rate, num=len(watermarked_audio))
+    plt.plot(time_watermarked, watermarked_audio, label='Watermarked Audio Signal', color='darkgreen')
+
+    plt.title('Watermarked Audio Signal')
+    plt.xlabel('Time (seconds)')
+    plt.ylabel('Amplitude')
+    plt.legend()
+    plt.grid()
+    plt.show()
 
 
 def add_watermark(bit_arr, data, num_point, shift_range, device, model, min_snr, max_snr, show_progress):
@@ -54,6 +101,11 @@ def add_watermark(bit_arr, data, num_point, shift_range, device, model, min_snr,
     reconstructed_array = np.concatenate(output_chunks)
 
     time_cost = time.time() - t1
+
+    watermark_bits = np.concatenate([fix_pattern, bit_arr])
+
+    plot_audio_with_watermark(data, reconstructed_array, watermark_bits, num_point)
+
 
     info = {
         "time_cost": time_cost,

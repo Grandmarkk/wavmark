@@ -25,6 +25,7 @@ signal, sample_rate = soundfile.read("example.wav")
 
 # 4.encode watermark
 watermarked_signal, _ = wavmark.encode_watermark(model, signal, payload, show_progress=True)
+
 # you can save it as a new wav:
 soundfile.write("watermarked_output.wav", watermarked_signal, 16000)
 
