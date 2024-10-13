@@ -15,44 +15,27 @@ fix_pattern = [1, 1, 1, 1, 0, 0, 1, 0, 0, 1, 1, 1, 0, 1, 1, 0, 0, 1, 1, 0, 0, 0,
                0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 1, 0]
 
 
-def plot_audio_with_watermark(original_audio, watermarked_audio, watermark_bits, num_point):
+def plot_audio_with_watermark(original_audio, watermarked_audio, watermark_indices):
     # Sample rate
     sample_rate = 16000  # 16 kHz
-
-    # Plot Original Audio Signal
-    plt.figure(figsize=(12, 10))
-
-    # Original Audio Plot
-    plt.subplot(2, 1, 1)
+    
+    # Create a time axis for the audio signal
     time_original = np.linspace(0, len(original_audio) / sample_rate, num=len(original_audio))
-    plt.plot(time_original, original_audio, label='Original Audio Signal', color='lightblue')
-
-    plt.title('Original Audio Signal')
-    plt.xlabel('Time (seconds)')
-    plt.ylabel('Amplitude')
-    plt.legend()
-    plt.grid()
-
-    # Watermark Bits Plot
-    plt.subplot(2, 1, 2)
-    time_watermark = np.linspace(0, len(watermark_bits) / sample_rate, num=len(watermark_bits))
-    plt.step(time_watermark, watermark_bits, label='Watermark Bits', color='purple', where='post')
-
-    plt.title('Watermark Bits')
-    plt.xlabel('Time (seconds)')
-    plt.ylabel('Watermark Value')
-    plt.yticks([0, 1], ['0', '1'])  # Only show 0 and 1
-    plt.grid()
-
-    plt.tight_layout()
-    plt.show()
-
-    # Plot Watermarked Audio Signal
-    plt.figure(figsize=(12, 6))
     time_watermarked = np.linspace(0, len(watermarked_audio) / sample_rate, num=len(watermarked_audio))
-    plt.plot(time_watermarked, watermarked_audio, label='Watermarked Audio Signal', color='darkgreen')
 
-    plt.title('Watermarked Audio Signal')
+    # Plot the original audio signal
+    plt.figure(figsize=(12, 6))
+    plt.plot(time_original, original_audio, label='Original Audio Signal', color='blue')
+
+    # Highlight the segments used for watermarking
+    for start, end in watermark_indices:
+        plt.axvspan(start / sample_rate, end / sample_rate,
+                    color='orange', alpha=0.5, label='Watermark Area' if start == watermark_indices[0][0] else "")
+
+    # Plot the watermarked audio signal
+    plt.plot(time_watermarked, watermarked_audio, label='Watermarked Audio Signal', color='red', alpha=0.5)
+
+    plt.title('Watermarked Audio Signal with Highlighted Watermark Areas')
     plt.xlabel('Time (seconds)')
     plt.ylabel('Amplitude')
     plt.legend()
@@ -70,6 +53,7 @@ def add_watermark(bit_arr, data, num_point, shift_range, device, model, min_snr,
     output_chunks = []
     encoded_sections = 0
     skip_sections = 0
+    watermark_indices = []  
 
     the_iter = range(num_segments)
     if show_progress:
@@ -89,6 +73,7 @@ def add_watermark(bit_arr, data, num_point, shift_range, device, model, min_snr,
             skip_sections += 1
         else:
             encoded_sections += 1
+            watermark_indices.append((start_point, start_point + num_point))
 
         output = np.concatenate([current_chunk_cover_area_wmd, current_chunk_shift_area])
         assert output.shape == current_chunk.shape
@@ -104,7 +89,6 @@ def add_watermark(bit_arr, data, num_point, shift_range, device, model, min_snr,
 
     watermark_bits = np.concatenate([fix_pattern, bit_arr])
 
-    plot_audio_with_watermark(data, reconstructed_array, watermark_bits, num_point)
 
 
     info = {
@@ -112,6 +96,8 @@ def add_watermark(bit_arr, data, num_point, shift_range, device, model, min_snr,
         "encoded_sections": encoded_sections,
         "skip_sections": skip_sections,
     }
+
+    # plot_audio_with_watermark(data, reconstructed_array, watermark_indices)
     return reconstructed_array, info
 
 

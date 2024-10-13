@@ -1,12 +1,18 @@
 import librosa
-import soundfile as sf
 
-def resample (file_path, sample_rate):
-    y, sr = librosa.load(file_path, sr=None)  # sr=None keeps the original sampling rate
+def resample(audio_signal, orig_sample_rate, target_sample_rate):
+    """
+    Resamples the given audio signal to a new sample rate.
 
-    # Resample the audio
-    y_resampled = librosa.resample(y, orig_sr=sr, target_sr=sample_rate)
-
-    # Save the resampled audio to a new file
-    output_file = 'output.wav'
-    sf.write(output_file, y_resampled, sample_rate)
+    Args:
+        audio_signal (numpy array): The input audio signal.
+        orig_sample_rate (int): The original sample rate of the audio signal.
+        target_sample_rate (int): The desired sample rate for the resampled audio.
+        
+    Returns:
+        numpy array: The resampled audio signal.
+    """
+    # Resample the audio signal
+    y_resampled = librosa.resample(audio_signal, orig_sr=orig_sample_rate, target_sr=target_sample_rate)
+    
+    return y_resampled
